@@ -113,6 +113,7 @@ def get_cumulative_type(rows: list) -> list[dict]:
     dates = [row[0] for row in rows]
     values = [row[1] for row in rows]
     cumulative_values = list(cumulative(values))
+
     return [
         {"date": date, "values": cumulative_value}
         for date, cumulative_value in zip(dates, cumulative_values)
