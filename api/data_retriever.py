@@ -3,7 +3,7 @@ import psycopg2
 import config
 
 
-def retrieve_possible_values(database, table_name):
+def retrieve_possible_values(database: str, table_name: str) -> dict:
     conn = psycopg2.connect(database)
     cur = conn.cursor()
 
@@ -43,7 +43,7 @@ def retrieve_possible_values(database, table_name):
     return data
 
 
-def retrieve_from_db(database, table_name, parameters):
+def retrieve_from_db(database: str, table_name: str, parameters: dict) -> list[dict]:
     conn = psycopg2.connect(database)
     cur = conn.cursor()
 
@@ -84,7 +84,7 @@ def retrieve_from_db(database, table_name, parameters):
         f"WHERE {where_clause} "
         f"GROUP BY timestamp, {group_by} "
     )
-    print(query)
+
     # Execute SQL query
     cur.execute(query, values)
     rows = cur.fetchall()
@@ -99,11 +99,11 @@ def retrieve_from_db(database, table_name, parameters):
     return timeline
 
 
-def get_usual_type(rows):
+def get_usual_type(rows: list) -> list[dict]:
     return [{"date": row[0], "value": row[1]} for row in rows]
 
 
-def get_cumulative_type(rows):
+def get_cumulative_type(rows: list) -> list[dict]:
     def cumulative(values_list: list):
         total = 0
         for x in values_list:

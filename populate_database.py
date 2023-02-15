@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 import config
 
 
-def write_csv_to_db(csv_file_path, db_conn_str, db_table):
+def write_csv_to_db(csv_file_path: str, db_conn_str: str, db_table: str) -> None:
     engine = create_engine(db_conn_str)
 
     df = pd.read_csv(csv_file_path, delimiter=";", header=0)
