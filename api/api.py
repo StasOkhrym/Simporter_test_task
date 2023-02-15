@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 
-from api.data_retriever import retrieve_from_df
+import config
+from api.data_retriever import retrieve_possible_values, retrieve_from_db
 from api.forms import TimelineForm
 
 api = Blueprint('api', __name__)
@@ -8,14 +9,24 @@ api = Blueprint('api', __name__)
 
 @api.route("/info",  methods=['GET'])
 def get_info():
-    return "Success"
+    possible_values = retrieve_possible_values(
+        database=config.DATABASE_NAME,
+        table_name=config.TABLE_NAME
+    )
+
+    return jsonify({"info": possible_values})
 
 
 @api.route("/timeline",  methods=['GET'])
 def get_timeline():
+    print(request.args)
     form = TimelineForm(request.args)
     if form.validate():
-        data = retrieve_from_df(form.data)
+        data = retrieve_from_db(
+            database=config.DATABASE_NAME,
+            table_name=config.TABLE_NAME,
+            parameters=form.data
+        )
         return jsonify({"timeline": data})
     else:
-        return {"errors": form.errors}
+        return jsonify({"errors": form.errors})
