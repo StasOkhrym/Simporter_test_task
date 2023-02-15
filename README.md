@@ -6,7 +6,7 @@ Python 3.10 and Docker must be installed
 
 - Clone repo and set up virtual environment:
 ```shell
-git clone TBA
+git clone https://github.com/StasOkhrym/Simporter_test_task.git
 python -m venv venv
 source venv/bin/activate (Linux and macOS) or venv\Scripts\activate (Windows)
 pip install -r requirements.txt
