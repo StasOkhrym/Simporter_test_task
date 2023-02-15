@@ -47,6 +47,23 @@ def retrieve_from_db(database: str, table_name: str, parameters: dict) -> list[d
     conn = psycopg2.connect(database)
     cur = conn.cursor()
 
+    values, query, repr_type = construct_query(table_name, parameters)
+
+    # Execute SQL query
+    cur.execute(query, values)
+    rows = cur.fetchall()
+    conn.close()
+
+    # Return timeline based on representation type
+    if repr_type == "cumulative":
+        timeline = get_cumulative_type(rows)
+    else:
+        timeline = get_usual_type(rows)
+
+    return timeline
+
+
+def construct_query(table_name: str, parameters: dict) -> tuple[list, str, str]:
     start_date = parameters.get("startDate")
     end_date = parameters.get("endDate")
     grouping = parameters.get("Grouping")
@@ -85,18 +102,7 @@ def retrieve_from_db(database: str, table_name: str, parameters: dict) -> list[d
         f"GROUP BY timestamp, {group_by} "
     )
 
-    # Execute SQL query
-    cur.execute(query, values)
-    rows = cur.fetchall()
-    conn.close()
-
-    # Return timeline based on representation type
-    if repr_type == "cumulative":
-        timeline = get_cumulative_type(rows)
-    else:
-        timeline = get_usual_type(rows)
-
-    return timeline
+    return values, query, repr_type
 
 
 def get_usual_type(rows: list) -> list[dict]:

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 import config
-from api.data_retriever import retrieve_possible_values, retrieve_from_db
+from api.utils import retrieve_possible_values, retrieve_from_db
 from api.forms import TimelineForm
 
 api = Blueprint("api", __name__)
