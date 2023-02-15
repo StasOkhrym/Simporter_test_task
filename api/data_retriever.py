@@ -1,8 +1,10 @@
-import sqlite3
+import psycopg2
+
+import config
 
 
 def retrieve_possible_values(database, table_name):
-    conn = sqlite3.connect(database)
+    conn = psycopg2.connect(database)
     cur = conn.cursor()
 
     # Query to retrieve earliest and latest dates
@@ -11,7 +13,7 @@ def retrieve_possible_values(database, table_name):
         f"FROM {table_name}"
     )
     earliest_date, latest_date = cur.fetchone()
-
+    print(earliest_date, latest_date)
     # Query to retrieve distinct values of brand, stars, source, id, and asin
     cur.execute(
         f"SELECT DISTINCT brand, stars, source, id, asin "
@@ -42,7 +44,7 @@ def retrieve_possible_values(database, table_name):
 
 
 def retrieve_from_db(database, table_name, parameters):
-    conn = sqlite3.connect(database)
+    conn = psycopg2.connect(database)
     cur = conn.cursor()
 
     start_date = parameters.get("startDate")
@@ -52,33 +54,35 @@ def retrieve_from_db(database, table_name, parameters):
     group_by = None
 
     # Construct SQL query
-    columns = "timestamp, COUNT(*) AS value"
+    columns = "to_char(timestamp, 'YYYY-MM-DD'), COUNT(*) AS value"
 
-    where_clause = "timestamp BETWEEN ? AND ?"
+    where_clause = "timestamp BETWEEN %s AND %s"
     values = [start_date, end_date]
 
-    # for attribute, value in parameters.get("filters").items():
-    #     if attribute and value:
-    #         where_clause += f" AND {attribute} = ?"
-    #         values.append(value)
+    # Adding filtering with additional attributes
+    for name in config.VALID_COLUMNS:
+        if value := parameters.get(name):
+            where_clause += f" AND {name} = %s"
+            values.append(value)
 
+    # Adding grouping by time period
     if grouping == "weekly":
-        group_by = "strftime('%Y-%W', timestamp)"
+        group_by = "to_char(timestamp, 'YYYY-IW')"
     elif grouping == "bi-weekly":
         group_by = (
-            "strftime('%Y-', timestamp) || "
-            "CASE WHEN strftime('%W', timestamp) % 2 = 0 "
-            "THEN strftime('%W', timestamp) - 1 "
-            "ELSE strftime('%W', timestamp) END"
+            "to_char(timestamp, 'YYYY-') || "
+            "CASE WHEN to_number(to_char(timestamp, 'IW')) % 2 = 0 "
+            "THEN to_char(timestamp - interval '1 week', 'IW') "
+            "ELSE to_char(timestamp, 'IW') END"
         )
     elif grouping == "monthly":
-        group_by = "strftime('%Y-%m', timestamp) || '-01'"
+        group_by = "to_char(timestamp, 'YYYY-MM')"
 
     query = (
         f"SELECT {columns} "
         f"FROM {table_name} "
         f"WHERE {where_clause} "
-        f"GROUP BY {group_by} "
+        f"GROUP BY timestamp, {group_by} "
     )
     print(query)
     # Execute SQL query
