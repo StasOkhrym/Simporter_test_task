@@ -13,7 +13,7 @@ def retrieve_possible_values(database: str, table_name: str) -> dict:
         f"FROM {table_name}"
     )
     earliest_date, latest_date = cur.fetchone()
-    print(earliest_date, latest_date)
+
     # Query to retrieve distinct values of brand, stars, source, id, and asin
     cur.execute(
         f"SELECT DISTINCT brand, stars, source, id, asin "
@@ -68,14 +68,14 @@ def retrieve_from_db(database: str, table_name: str, parameters: dict) -> list[d
     # Adding grouping by time period
     if grouping == "weekly":
         group_by = "to_char(timestamp, 'YYYY-IW')"
-    elif grouping == "bi-weekly":
+    if grouping == "bi-weekly":
         group_by = (
             "to_char(timestamp, 'YYYY-') || "
             "CASE WHEN to_number(to_char(timestamp, 'IW')) % 2 = 0 "
             "THEN to_char(timestamp - interval '1 week', 'IW') "
             "ELSE to_char(timestamp, 'IW') END"
         )
-    elif grouping == "monthly":
+    if grouping == "monthly":
         group_by = "to_char(timestamp, 'YYYY-MM')"
 
     query = (
@@ -95,7 +95,7 @@ def retrieve_from_db(database: str, table_name: str, parameters: dict) -> list[d
         timeline = get_cumulative_type(rows)
     else:
         timeline = get_usual_type(rows)
-    print(len(timeline))
+
     return timeline
 
 
