@@ -20,3 +20,8 @@ docker-compose up --build
 ```shell
 python populate_database.py
 ```
+- Run app:
+```shell
+python -m flask run
+```
+  
