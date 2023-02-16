@@ -10,10 +10,14 @@ from wtforms import (
 
 class TimelineForm(Form):
     startDate = DateField(
-        "startDate", format="%Y-%m-%d", validators=[validators.DataRequired()]
+        "startDate",
+        format="%Y-%m-%d",
+        validators=[validators.DataRequired()]
     )
     endDate = DateField(
-        "endDate", format="%Y-%m-%d", validators=[validators.DataRequired()]
+        "endDate",
+        format="%Y-%m-%d",
+        validators=[validators.DataRequired()]
     )
     Type = SelectField(
         "Type",

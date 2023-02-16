@@ -1,6 +1,5 @@
 import psycopg2
-
-import config
+from flask import current_app
 
 
 def retrieve_possible_values(database: str, table_name: str) -> dict:
@@ -9,7 +8,8 @@ def retrieve_possible_values(database: str, table_name: str) -> dict:
 
     # Query to retrieve earliest and latest dates
     cur.execute(
-        f"SELECT MIN(timestamp) AS earliest_date, MAX(timestamp) AS latest_date "
+        f"SELECT MIN(to_char(timestamp, 'YYYY-MM-DD')) AS earliest_date, "
+        f"MAX(to_char(timestamp, 'YYYY-MM-DD')) AS latest_date "
         f"FROM {table_name}"
     )
     earliest_date, latest_date = cur.fetchone()
@@ -43,7 +43,11 @@ def retrieve_possible_values(database: str, table_name: str) -> dict:
     return data
 
 
-def retrieve_from_db(database: str, table_name: str, parameters: dict) -> list[dict]:
+def retrieve_from_db(
+        database: str,
+        table_name: str,
+        parameters: dict
+) -> list[dict]:
     conn = psycopg2.connect(database)
     cur = conn.cursor()
 
@@ -63,7 +67,11 @@ def retrieve_from_db(database: str, table_name: str, parameters: dict) -> list[d
     return timeline
 
 
-def construct_query(table_name: str, parameters: dict) -> tuple[list, str, str]:
+def construct_query(
+        table_name: str,
+        parameters: dict
+) -> tuple[list, str, str]:
+
     start_date = parameters.get("startDate")
     end_date = parameters.get("endDate")
     grouping = parameters.get("Grouping")
@@ -77,7 +85,7 @@ def construct_query(table_name: str, parameters: dict) -> tuple[list, str, str]:
     values = [start_date, end_date]
 
     # Adding filtering with additional attributes
-    for name in config.VALID_COLUMNS:
+    for name in current_app.config["VALID_COLUMNS"]:
         if value := parameters.get(name):
             where_clause += f" AND {name} = %s"
             values.append(value)

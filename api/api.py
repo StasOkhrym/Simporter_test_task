@@ -11,7 +11,7 @@ api = Blueprint("api", __name__)
 def get_info():
     possible_values = retrieve_possible_values(
         database=current_app.config["CONNECTION_STRING"],
-        table_name=current_app.config["TABLE_NAME"]
+        table_name=current_app.config["TABLE_NAME"],
     )
 
     return jsonify({"info": possible_values})
