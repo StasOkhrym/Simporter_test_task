@@ -1,7 +1,8 @@
 import pandas as pd
+from flask import current_app
 from sqlalchemy import create_engine
 
-import config
+from app import app
 
 
 def write_csv_to_db(csv_file_path: str, db_conn_str: str, db_table: str) -> None:
@@ -15,8 +16,9 @@ def write_csv_to_db(csv_file_path: str, db_conn_str: str, db_table: str) -> None
 
 
 if __name__ == "__main__":
-    write_csv_to_db(
-        csv_file_path=config.CSV_FILE_PATH,
-        db_conn_str=config.CONNECTION_STRING,
-        db_table=config.TABLE_NAME,
+    with app.app_context():
+        write_csv_to_db(
+            csv_file_path=current_app.config["CSV_FILE_PATH"],
+            db_conn_str=current_app.config["CONNECTION_STRING"],
+            db_table=current_app.config["TABLE_NAME"],
     )
